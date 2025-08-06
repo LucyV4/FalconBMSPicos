@@ -45,6 +45,7 @@ private:
 
 	// HID report descriptor - simplified, can be updated for your real one
 	static const uint8_t desc_hid_report[];
+	static const uint8_t desc_reboot_report[];
 
 	// Configuration descriptor buffer
 	static const uint8_t desc_configuration[];

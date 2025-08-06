@@ -1,4 +1,5 @@
 #include "tusb.h"
+#include "pico/bootrom.h"
 
 extern "C" {
 	//--------------------------------------------------------------------+
@@ -47,6 +48,14 @@ extern "C" {
 	// received data on OUT endpoint ( Report ID = 0, Type = 0 )
 	void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize)
 	{
-		tud_hid_report(0, buffer, bufsize);
-	}	
+		if (instance == 0) {}
+		else if (instance == 1) {
+			if (bufsize >= 1) {
+				// Example: reboot trigger = 0xA5 in first byte
+				if (buffer[0] == 0xA5) {
+					reset_usb_boot(0, 0);
+				}
+			}
+		}
+	}
 }

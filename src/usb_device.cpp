@@ -15,11 +15,16 @@ const uint8_t UsbDevice::desc_hid_report[] = {
 	FLIGHT_SIM_REPORT_DESC(HID_REPORT_ID(1)),
 };
 
+const uint8_t UsbDevice::desc_reboot_report[] = {
+    REBOOT_CONTROL_REPORT_DESC(HID_REPORT_ID(2)),
+};
+
 // Static configuration descriptor - same as original but static
 const uint8_t UsbDevice::desc_configuration[] = {
-	TUD_CONFIG_DESCRIPTOR(1, 3, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_HID_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+	TUD_CONFIG_DESCRIPTOR(1, 4, 0, TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_HID_DESC_LEN + TUD_HID_DESC_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+	TUD_CDC_DESCRIPTOR(0, 4, 0x83, 8, 0x02, 0x84, 64),
 	TUD_HID_DESCRIPTOR(2, 0, HID_ITF_PROTOCOL_NONE, sizeof(desc_hid_report), 0x81, CFG_TUD_HID_BUFSIZE, 1),
-	TUD_CDC_DESCRIPTOR(0, 4, 0x83, 8, 0x02, 0x84, 64)
+	TUD_HID_DESCRIPTOR(3, 0, HID_ITF_PROTOCOL_NONE, sizeof(desc_reboot_report), 0x82, CFG_TUD_HID_BUFSIZE, 1),
 };
 
 // Default strings fallback
@@ -78,8 +83,12 @@ const uint8_t* UsbDevice::getConfigurationDescriptor(uint8_t /*index*/) const {
 }
 
 // Return pointer to HID report descriptor
-const uint8_t* UsbDevice::getHidReportDescriptor(uint8_t /*instance*/) const {
-	return desc_hid_report;
+const uint8_t* UsbDevice::getHidReportDescriptor(uint8_t instance) const {
+	switch (instance) {
+        case 0: return desc_hid_report;       // HID instance 0 -> interface 2
+        case 1: return desc_reboot_report;    // HID instance 1 -> interface 3
+        default: return nullptr;
+    }
 }
 
 // Return string descriptor in UTF-16 format

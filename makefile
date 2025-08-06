@@ -24,3 +24,8 @@ ifneq ($(MAKECMDGOALS),)
 %::
 	@ninja -C $(BUILD_DIR) $@
 endif
+
+flash: FORCE compile
+	@./helper/pico_off.exe
+	@picotool load firmware/ewpi.uf2
+	@picotool reboot
