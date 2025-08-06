@@ -1,4 +1,6 @@
 # CMakeLists.txt (picos)
+
+# Sets common sources 
 set(SHARED_SOURCES
 	${SOURCE_DIR}/f16pico.cpp
 	${SOURCE_DIR}/f16data.cpp
@@ -6,11 +8,13 @@ set(SHARED_SOURCES
 	${SOURCE_DIR}/usb_callbacks.cpp
 )
 
+# Sets common directories
 set(SHARED_INCLUDE_DIRS
 	${INCLUDE_DIR}
 	${INCLUDE_DIR}/modules
 )
 
+# Sets common libraries
 set(SHARED_LIBS
 	pico_stdlib
 	hardware_adc
@@ -21,5 +25,6 @@ set(SHARED_LIBS
 	pico_unique_id
 )
 
+# DEFINE PICOS HERE
 add_subdirectory("ewpi")
 add_subdirectory("ewmu")
