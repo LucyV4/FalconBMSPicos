@@ -1,26 +1,42 @@
-# CMakeLists.txt
-cmake_minimum_required(VERSION 3.12)
+# Generated Cmake Pico project file
+
+cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Set some directories for files
+# Initialise pico_sdk from installed location
+# (note this can come from environment, CMake cache etc)
+
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.2.0)
+set(toolchainVersion 14_2_Rel1)
+set(picotoolVersion 2.2.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+set(PICO_BOARD pico CACHE STRING "Board type")
+
+# Pull in Raspberry Pi Pico SDK (must be before project)
+include(pico_sdk_import.cmake)
+
+project(FalconBMSPicos C CXX ASM)
+
+# Initialise the Raspberry Pi Pico SDK
+pico_sdk_init()
+
+# Set directories for files
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 set(FIRMWARE_DIR ${CMAKE_SOURCE_DIR}/firmware)
-
-# Check if PICO_SDK_PATH is defined
-if(NOT DEFINED ENV{PICO_SDK_PATH})
-	message(FATAL_ERROR "PICO_SDK_PATH environment variable is not set.")
-endif()
-
-# Adds pico sdk
-include($ENV{PICO_SDK_PATH}/pico_sdk_init.cmake)
-
-project(f16_builds C CXX ASM)
-
-pico_sdk_init()
 
 # Adds the picos
 add_subdirectory(picos)

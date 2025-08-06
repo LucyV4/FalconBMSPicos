@@ -24,11 +24,11 @@ const uint8_t UsbDevice::desc_configuration[] = {
 
 // Default strings fallback
 const char* const UsbDevice::string_desc_arr_default[5] = {
-	(const char[]){0x09, 0x04},		 // Supported language: English (0x0409)
-	"Raspberry Pi",					 // Manufacturer
-	"F16 EWPI",						// Product
-	nullptr,						  // Serial to be generated dynamically
-	"F16 EWPI CDC"					// CDC Interface string
+	(const char[]){0x09, 0x04},		// Supported language: English (0x0409)
+	"Raspberry Pi",					// Manufacturer
+	"F16 ...",						// Product
+	nullptr,						// Serial to be generated dynamically
+	"F16 ... CDC"					// CDC Interface string
 };
 
 UsbDevice::UsbDevice(const char* name)  : pico_name(name) {

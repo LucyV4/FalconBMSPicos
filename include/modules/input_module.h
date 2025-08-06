@@ -10,7 +10,7 @@ public:
 	virtual void setup();
 	virtual void update(F16Data& data);
 	uint8_t get_gpio() { return gpio_pin; };
-	virtual ~InputModule() = default;
+	virtual ~InputModule();
 protected:
 	uint8_t gpio_pin;
 };
