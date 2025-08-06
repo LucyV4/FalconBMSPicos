@@ -1,0 +1,6 @@
+# Generated
+build/
+firmware/
+
+# VSCode files
+.vscode
