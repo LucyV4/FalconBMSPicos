@@ -3,4 +3,4 @@ build/
 firmware/
 
 # VSCode files
-.vscode
+!vscode/*

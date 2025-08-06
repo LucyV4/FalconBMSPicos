@@ -10,7 +10,7 @@ target_link_libraries(${PICO_NAME} PRIVATE ${SHARED_LIBS})
 
 # Set UF2 and ELF output directory
 set_target_properties(${PICO_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${FIRMWARE_DIR}
+    ARCHIVE_OUTPUT_DIRECTORY ${FIRMWARE_DIR}
 )
 
 # Required
