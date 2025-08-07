@@ -5,7 +5,7 @@
 #include "input_button.h"
 #include "input_potentiometer.h"
 #include "uart_module.h"
-#include "f16data.h"
+#include "pico_data.h"
 
 enum GpioPins: uint8_t {
 	EWMUTX = 0,		// EWPI to EWMU uart TX pin
@@ -43,8 +43,8 @@ int main() {
 	myPico.add_output(new LedOutput(PRILED, FlightData::LightBits2::PriMode, FlightData2::BlinkBits::PriMode, 100));
 	myPico.add_output(new LedOutput(OPNLED, FlightData::LightBits2::PriMode, FlightData2::BlinkBits::PriMode, 100, true));
 
-	std::function<void(F16Data&, Display&)> ewpiDisplayFunc;
-	ewpiDisplayFunc = [](F16Data& data, Display& display) {
+	std::function<void(PicoData&, Display&)> ewpiDisplayFunc;
+	ewpiDisplayFunc = [](PicoData& data, Display& display) {
 		display.writef(0, "%d", data.flightData.ChaffCount);
 		display.writef(4, "%*d", 4, data.flightData.FlareCount);
 		display.writef(8, "JMR.data.");
@@ -54,8 +54,8 @@ int main() {
 	/*
 	 ** EXAMPLE INPUT MODULES
 	 */
-	// std::function<void(F16Data&, bool)> toggleButtonFunc;
-	// toggleButtonFunc = [](F16Data& data, bool button_on) {
+	// std::function<void(PicoData&, bool)> toggleButtonFunc;
+	// toggleButtonFunc = [](PicoData& data, bool button_on) {
 	// 	gpio_put(25, button_on);
 	// 	data.setButton(0, button_on);
 	// };
@@ -66,16 +66,16 @@ int main() {
 	/*
 	 ** EXAMPLE UART MODULES
 	 */
-	std::function<void(F16Data&, uart_inst_t*)> uart0Func;
-	uart0Func = [](F16Data& data, uart_inst_t* uart_inst) {
+	std::function<void(PicoData&, uart_inst_t*)> uart0Func;
+	uart0Func = [](PicoData& data, uart_inst_t* uart_inst) {
 		bool flag = data.flightData.IsSet2(FlightData::LightBits2::Unk);
 		uint8_t byte_to_send = flag;
 		uart_putc(uart_inst, byte_to_send);
 	};
 	myPico.add_uart(new UARTModule(EWMUTX, EWMURX, uart0, uart0Func));
 	
-	std::function<void(F16Data&, uart_inst_t*)> uart1Func;
-	uart1Func = [](F16Data& data, uart_inst_t* uart_inst) {
+	std::function<void(PicoData&, uart_inst_t*)> uart1Func;
+	uart1Func = [](PicoData& data, uart_inst_t* uart_inst) {
 		uint8_t rec = uart_getc(uart_inst);
 		gpio_put(25, rec > 0);
 	};

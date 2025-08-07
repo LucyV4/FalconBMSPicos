@@ -65,8 +65,8 @@ void F16Pico::update_serial() {
 		memcpy(&cur_flightData, receivedBuffer, sizeof(FlightData));
 		memcpy(&cur_flightData2, receivedBuffer+sizeof(FlightData), sizeof(FlightData2));
 
-		f16Data.flightData = cur_flightData;
-		f16Data.flightData2 = cur_flightData2;
+		picoData.flightData = cur_flightData;
+		picoData.flightData2 = cur_flightData2;
 	}
 }
 
@@ -80,7 +80,7 @@ void F16Pico::send_hid() {
 	start_ms_hid += interval_ms_hid;
 
 	if (tud_hid_ready()) {
-		tud_hid_n_report(0x00, 0x01, &f16Data.report, sizeof(f16Data.report));
+		tud_hid_n_report(0x00, 0x01, &picoData.report, sizeof(picoData.report));
 	}
 }
 
@@ -126,7 +126,7 @@ void F16Pico::update_input() {
 	if (board_millis() - start_ms_update_in < interval_ms_update_in) return;
 	start_ms_update_in += interval_ms_update_in;
 
-	for (auto *module : inputModules) { module->update(f16Data); }
+	for (auto *module : inputModules) { module->update(picoData); }
 }
 
 void F16Pico::update_output() {
@@ -136,7 +136,7 @@ void F16Pico::update_output() {
 	if (board_millis() - start_ms_update_out < interval_ms_update_out) return;
 	start_ms_update_out += interval_ms_update_out;
 
-	for (auto *module : outputModules) { module->update(f16Data); }
+	for (auto *module : outputModules) { module->update(picoData); }
 }
 
 void F16Pico::update_uart() {
@@ -146,6 +146,6 @@ void F16Pico::update_uart() {
 	if (board_millis() - start_ms_update_uart < interval_ms_update_uart) return;
 	start_ms_update_uart += interval_ms_update_uart;
 
-	if (uartModule0) uartModule0->update(f16Data);
-	if (uartModule1) uartModule1->update(f16Data);
+	if (uartModule0) uartModule0->update(picoData);
+	if (uartModule1) uartModule1->update(picoData);
 }

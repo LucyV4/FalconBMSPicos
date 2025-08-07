@@ -4,7 +4,7 @@
 #include "output_display.h"
 #include "input_button.h"
 #include "input_potentiometer.h"
-#include "f16data.h"
+#include "pico_data.h"
 
 enum GpioPins: uint8_t {
 	EWMUTX = 0,		// EWMU uart TX pin
@@ -39,16 +39,16 @@ int main() {
 	myPico.add_output(new LedOutput(PRILED, FlightData::LightBits2::PriMode, FlightData2::BlinkBits::PriMode, 100));
 	myPico.add_output(new LedOutput(OPNLED, FlightData::LightBits2::PriMode, FlightData2::BlinkBits::PriMode, 100, true));
 
-	std::function<void(F16Data&, Display&)> ewpiDisplayFunc;
-	ewpiDisplayFunc = [](F16Data& data, Display& display) {
+	std::function<void(PicoData&, Display&)> ewpiDisplayFunc;
+	ewpiDisplayFunc = [](PicoData& data, Display& display) {
 		display.writef(0, "%d", data.flightData.ChaffCount);
 		display.writef(4, "%*d", 4, data.flightData.FlareCount);
 		display.writef(8, "JMR.data.");
 	};
 	myPico.add_output(new DisplayOutput(DISDATAIN, DISRS, DISCLOCK, DISCE, DISRESET, DISBLANK, 16, ewpiDisplayFunc));
 
-	std::function<void(F16Data&, bool)> toggleButtonFunc;
-	toggleButtonFunc = [](F16Data& data, bool button_on) {
+	std::function<void(PicoData&, bool)> toggleButtonFunc;
+	toggleButtonFunc = [](PicoData& data, bool button_on) {
 		gpio_put(25, button_on);
 		data.setButton(0, button_on);
 	};

@@ -3,7 +3,7 @@
 # Sets common sources 
 set(SHARED_SOURCES
 	${SOURCE_DIR}/f16pico.cpp
-	${SOURCE_DIR}/f16data.cpp
+	${SOURCE_DIR}/pico_data.cpp
 	${SOURCE_DIR}/usb_device.cpp
 	${SOURCE_DIR}/usb_callbacks.cpp
 	${SOURCE_DIR}/output_module.cpp

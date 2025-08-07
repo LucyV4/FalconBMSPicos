@@ -1,9 +1,9 @@
-#include "f16data.h"
+#include "pico_data.h"
 
-F16Data::F16Data() {}
+PicoData::PicoData() {}
 
-void F16Data::setThrottle(uint8_t index, uint16_t value) { report.throttle[index] = value; }
-void F16Data::setButton(uint8_t index, bool pressed) {
+void PicoData::setThrottle(uint8_t index, uint16_t value) { report.throttle[index] = value; }
+void PicoData::setButton(uint8_t index, bool pressed) {
 	int byteIndex = index / 8;
     int bitIndex = index % 8;
 

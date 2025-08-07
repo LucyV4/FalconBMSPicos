@@ -14,25 +14,25 @@ struct BlinkState {
 class LedOutput : public OutputModule {
 public:
 	// Basic constructor where function is self-specified
-	explicit LedOutput(uint8_t gpio_pin, std::function<bool(F16Data&, uint8_t)> led_on_function) : OutputModule(gpio_pin), updateFunc(led_on_function) {}
+	explicit LedOutput(uint8_t gpio_pin, std::function<bool(PicoData&, uint8_t)> led_on_function) : OutputModule(gpio_pin), updateFunc(led_on_function) {}
 
 	// 3 COnstructors (each of the lightbit enums) for standard lights (on/off)
 	explicit LedOutput(uint8_t gpio_pin, FlightData::LightBits light_bit, bool inverted = false) : OutputModule(gpio_pin) {
-		updateFunc = [light_bit, inverted](F16Data& data, uint8_t gpio_pin) {
+		updateFunc = [light_bit, inverted](PicoData& data, uint8_t gpio_pin) {
 			bool is_on = data.flightData.IsSet(light_bit);
 			if (inverted) is_on = !is_on;
 			gpio_put(gpio_pin, is_on);
 		};
 	}
 	explicit LedOutput(uint8_t gpio_pin, FlightData::LightBits2 light_bit, bool inverted = false) : OutputModule(gpio_pin) {
-		updateFunc = [light_bit, inverted](F16Data& data, uint8_t gpio_pin) {
+		updateFunc = [light_bit, inverted](PicoData& data, uint8_t gpio_pin) {
 			bool is_on = data.flightData.IsSet2(light_bit);
 			if (inverted) is_on = !is_on;
 			gpio_put(gpio_pin, is_on);
 		};
 	}
 	explicit LedOutput(uint8_t gpio_pin, FlightData::LightBits3 light_bit, bool inverted = false) : OutputModule(gpio_pin) {
-		updateFunc = [light_bit, inverted](F16Data& data, uint8_t gpio_pin) {
+		updateFunc = [light_bit, inverted](PicoData& data, uint8_t gpio_pin) {
 			bool is_on = data.flightData.IsSet3(light_bit);
 			if (inverted) is_on = !is_on;
 			gpio_put(gpio_pin, is_on);
@@ -45,7 +45,7 @@ public:
 		blink_state->blink_on = true;
 		blink_state->start_blink_ms = 0;
 
-		updateFunc = [light_bit, blink_bit, blink_ms, inverted, blink_state](F16Data& data, uint8_t gpio_pin) { 
+		updateFunc = [light_bit, blink_bit, blink_ms, inverted, blink_state](PicoData& data, uint8_t gpio_pin) { 
 			bool is_on = data.flightData.IsSet(light_bit); 
 			if (inverted) is_on = !is_on;
 			bool is_blinking = data.flightData2.IsSetBlink(blink_bit);
@@ -63,7 +63,7 @@ public:
 		blink_state->blink_on = true;
 		blink_state->start_blink_ms = 0;
 
-		updateFunc = [light_bit, blink_bit, blink_ms, inverted, blink_state](F16Data& data, uint8_t gpio_pin) { 
+		updateFunc = [light_bit, blink_bit, blink_ms, inverted, blink_state](PicoData& data, uint8_t gpio_pin) { 
 			bool is_on = data.flightData.IsSet2(light_bit); 
 			if (inverted) is_on = !is_on;
 			bool is_blinking = data.flightData2.IsSetBlink(blink_bit);
@@ -81,7 +81,7 @@ public:
 		blink_state->blink_on = true;
 		blink_state->start_blink_ms = 0;
 
-		updateFunc = [light_bit, blink_bit, blink_ms, inverted, blink_state](F16Data& data, uint8_t gpio_pin) { 
+		updateFunc = [light_bit, blink_bit, blink_ms, inverted, blink_state](PicoData& data, uint8_t gpio_pin) { 
 			bool is_on = data.flightData.IsSet3(light_bit); 
 			if (inverted) is_on = !is_on;
 			bool is_blinking = data.flightData2.IsSetBlink(blink_bit);
@@ -100,10 +100,10 @@ public:
 		gpio_set_dir(gpio_pin, GPIO_OUT);
 	}
 
-	void update(F16Data& data) override {
+	void update(PicoData& data) override {
 		updateFunc(data, gpio_pin);
 	}
 private:
-	std::function<void(F16Data&, uint8_t)> updateFunc;
+	std::function<void(PicoData&, uint8_t)> updateFunc;
 };
 

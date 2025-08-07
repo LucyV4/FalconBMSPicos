@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include "flightdata.h"
 
-class F16Data {
+class PicoData {
 public:
-	F16Data();
+	PicoData();
 
 	void setThrottle(uint8_t index, uint16_t value);
 	void setButton(uint8_t index, bool pressed);

@@ -5,7 +5,7 @@
 #include "output_module.h"
 #include "input_module.h"
 #include "uart_module.h"
-#include "f16data.h"
+#include "pico_data.h"
 
 class F16Pico {
 public:
@@ -18,7 +18,7 @@ public:
 
 private:
 	UsbDevice myUsb;
-	F16Data f16Data = F16Data();
+	PicoData picoData = PicoData();
 
 	std::vector<InputModule*> inputModules;
 	std::vector<OutputModule*> outputModules;

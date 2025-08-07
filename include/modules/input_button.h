@@ -14,9 +14,9 @@ enum class ButtonMode {
 class ButtonInput : public InputModule {
 public:
 
-	explicit ButtonInput(uint8_t gpio_pin, std::function<void(F16Data&, bool)> update_function, ButtonMode button_mode = ButtonMode::ActiveLow) : InputModule(gpio_pin), buttonMode(button_mode), updateFunc(update_function) {}
+	explicit ButtonInput(uint8_t gpio_pin, std::function<void(PicoData&, bool)> update_function, ButtonMode button_mode = ButtonMode::ActiveLow) : InputModule(gpio_pin), buttonMode(button_mode), updateFunc(update_function) {}
 	explicit ButtonInput(uint8_t gpio_pin, uint8_t controller_button_index, ButtonMode button_mode = ButtonMode::ActiveLow) : InputModule(gpio_pin), buttonMode(button_mode) {
-		updateFunc = [controller_button_index](F16Data& data, bool button_active) { data.setButton(controller_button_index, button_active); };
+		updateFunc = [controller_button_index](PicoData& data, bool button_active) { data.setButton(controller_button_index, button_active); };
 	}
 
 	void setup() override {
@@ -25,7 +25,7 @@ public:
 		gpio_set_pulls(gpio_pin, true, false);
 	}
 
-	void update(F16Data& data) override {
+	void update(PicoData& data) override {
 		bool raw_input = gpio_get(gpio_pin);
 
 		// Check for button input 
@@ -53,5 +53,5 @@ private:
 	bool last_raw_input = 1;
 	bool is_pressed = 0;
 	ButtonMode buttonMode;
-	std::function<void(F16Data&, bool)> updateFunc;
+	std::function<void(PicoData&, bool)> updateFunc;
 };
