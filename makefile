@@ -1,5 +1,6 @@
 BUILD_DIR ?= build
 FIRMWARE_DIR ?= firmware
+TARGET ?= ewpi
 
 CMFLAGS += --fresh
 CMFLAGS += --log-level WARNING
@@ -19,13 +20,7 @@ compile: $(BUILD_DIR)/build.ninja FORCE
 clean: FORCE
 	$(RM) -r $(BUILD_DIR) $(FIRMWARE_DIR)
 
-# Forward any unknown targets to Ninja
-ifneq ($(MAKECMDGOALS),)
-%::
-	@ninja -C $(BUILD_DIR) $@
-endif
-
 flash: FORCE compile
-	@./helper/pico_off.exe
-	@picotool load firmware/ewpi.uf2
+	@./helper/pico_off.exe $(TARGET)
+	@picotool load firmware/$(TARGET).uf2
 	@picotool reboot
