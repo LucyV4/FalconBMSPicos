@@ -1,5 +1,5 @@
 // ewpi.cpp
-#include "f16pico.h"
+#include "pico_device.h"
 #include "output_led.h"
 #include "output_display.h"
 #include "input_button.h"
@@ -31,7 +31,7 @@ enum GpioPins: uint8_t {
 	BRTADC = 2,		// BRT pot adc num
 };
 
-F16Pico myPico("EWMU");
+PicoDevice myPico("EWMU");
 
 int main() {
 	myPico.add_output(new LedOutput(LNKLED, FlightData::LightBits2::Unk));

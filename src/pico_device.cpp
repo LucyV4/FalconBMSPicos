@@ -1,14 +1,14 @@
-#include "f16pico.h"
+#include "pico_device.h"
 #include "pico/stdlib.h"
 #include "tusb.h"
 #include "bsp/board.h"
 #include <cstdint>
 
-F16Pico::F16Pico(const char* deviceName): myUsb(deviceName) {
+PicoDevice::PicoDevice(const char* deviceName): myUsb(deviceName) {
 	usbDevice_setInstance(&myUsb);
 }
 
-void F16Pico::start() {
+void PicoDevice::start() {
 	stdio_init_all();
 
 	board_init();
@@ -41,7 +41,7 @@ void F16Pico::start() {
 	}
 }
 
-void F16Pico::update_serial() {
+void PicoDevice::update_serial() {
 	// poll every 100ms
 	const uint32_t interval_ms_cdc = 100;
 	static uint32_t start_ms_cdc = 0;
@@ -70,7 +70,7 @@ void F16Pico::update_serial() {
 	}
 }
 
-void F16Pico::send_hid() {
+void PicoDevice::send_hid() {
 	// Poll every 10ms
 	const uint32_t interval_ms_hid = 10;
 	static uint32_t start_ms_hid = 0;
@@ -84,7 +84,7 @@ void F16Pico::send_hid() {
 	}
 }
 
-void F16Pico::wake_up() {
+void PicoDevice::wake_up() {
 	const uint32_t interval_ms_wakeup = 10;
 	static uint32_t start_ms_wakeup = 0;
 
@@ -100,9 +100,9 @@ void F16Pico::wake_up() {
 }
 
 
-void F16Pico::add_input(InputModule* module) { inputModules.push_back(module); }
-void F16Pico::add_output(OutputModule* module) { outputModules.push_back(module); }
-void F16Pico::add_uart(UARTModule* module) {
+void PicoDevice::add_input(InputModule* module) { inputModules.push_back(module); }
+void PicoDevice::add_output(OutputModule* module) { outputModules.push_back(module); }
+void PicoDevice::add_uart(UARTModule* module) {
 	uart_inst_t* module_uart_inst = module->get_uart_inst();
     if (module_uart_inst == uart0) {
         uartModule0 = module;
@@ -111,7 +111,7 @@ void F16Pico::add_uart(UARTModule* module) {
     }
 }
 
-void F16Pico::init_modules() {
+void PicoDevice::init_modules() {
 	for (auto *module : outputModules) { module->setup(); }
 	for (auto *module : inputModules) { module->setup(); }
 
@@ -119,7 +119,7 @@ void F16Pico::init_modules() {
 	if (uartModule1) uartModule1->setup();
 }
 
-void F16Pico::update_input() {
+void PicoDevice::update_input() {
 	const uint32_t interval_ms_update_in = 10;
 	static uint32_t start_ms_update_in = 5;
 	
@@ -129,7 +129,7 @@ void F16Pico::update_input() {
 	for (auto *module : inputModules) { module->update(picoData); }
 }
 
-void F16Pico::update_output() {
+void PicoDevice::update_output() {
 	const uint32_t interval_ms_update_out = 10;
 	static uint32_t start_ms_update_out = 5;
 	
@@ -139,7 +139,7 @@ void F16Pico::update_output() {
 	for (auto *module : outputModules) { module->update(picoData); }
 }
 
-void F16Pico::update_uart() {
+void PicoDevice::update_uart() {
 	const uint32_t interval_ms_update_uart = 100;
 	static uint32_t start_ms_update_uart = 0;
 	
