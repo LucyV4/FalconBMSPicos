@@ -31,7 +31,7 @@ enum GpioPins: uint8_t {
 	BRTADC = 2,		// BRT pot adc num
 };
 
-F16Pico myPico("EWPI");
+F16Pico myPico("EWMU");
 
 int main() {
 	myPico.add_output(new LedOutput(LNKLED, FlightData::LightBits2::Unk));
