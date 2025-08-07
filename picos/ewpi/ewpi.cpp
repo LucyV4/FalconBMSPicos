@@ -4,11 +4,12 @@
 #include "output_display.h"
 #include "input_button.h"
 #include "input_potentiometer.h"
+#include "uart_module.h"
 #include "f16data.h"
 
 enum GpioPins: uint8_t {
-	EWMUTX = 0,		// EWMU uart TX pin
-	EWMURX = 1, 	// EWMU uart RX pin
+	EWMUTX = 0,		// EWPI to EWMU uart TX pin
+	EWMURX = 1, 	// EWPI to EWMU uart RX pin
 
 	LNKLED = 6,		// LNK led
 	LNCHLED = 7,	// LNCH led
@@ -34,6 +35,9 @@ enum GpioPins: uint8_t {
 F16Pico myPico("EWPI");
 
 int main() {
+	/*
+	 ** EXAMPLE OUTPUT MODULES
+	 */
 	myPico.add_output(new LedOutput(LNKLED, FlightData::LightBits2::Unk));
 	myPico.add_output(new LedOutput(LNCHLED, FlightData::LightBits2::Launch, FlightData2::BlinkBits::Launch, 250));
 	myPico.add_output(new LedOutput(PRILED, FlightData::LightBits2::PriMode, FlightData2::BlinkBits::PriMode, 100));
@@ -47,14 +51,36 @@ int main() {
 	};
 	myPico.add_output(new DisplayOutput(DISDATAIN, DISRS, DISCLOCK, DISCE, DISRESET, DISBLANK, 16, ewpiDisplayFunc));
 
-	std::function<void(F16Data&, bool)> toggleButtonFunc;
-	toggleButtonFunc = [](F16Data& data, bool button_on) {
-		gpio_put(25, button_on);
-		data.setButton(0, button_on);
-	};
-	myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
+	/*
+	 ** EXAMPLE INPUT MODULES
+	 */
+	// std::function<void(F16Data&, bool)> toggleButtonFunc;
+	// toggleButtonFunc = [](F16Data& data, bool button_on) {
+	// 	gpio_put(25, button_on);
+	// 	data.setButton(0, button_on);
+	// };
+	// myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
 	// myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
 	// myPico.add_input(new PotInput(BRTPOT, BRTADC, 0));
+
+	/*
+	 ** EXAMPLE UART MODULES
+	 */
+	std::function<void(F16Data&, uart_inst_t*)> uart0Func;
+	uart0Func = [](F16Data& data, uart_inst_t* uart_inst) {
+		bool flag = data.flightData.IsSet2(FlightData::LightBits2::Unk);
+		uint8_t byte_to_send = flag;
+		uart_putc(uart_inst, byte_to_send);
+	};
+	myPico.add_uart(new UARTModule(EWMUTX, EWMURX, uart0, uart0Func));
+	
+	std::function<void(F16Data&, uart_inst_t*)> uart1Func;
+	uart1Func = [](F16Data& data, uart_inst_t* uart_inst) {
+		uint8_t rec = uart_getc(uart_inst);
+		gpio_put(25, rec > 0);
+	};
+	myPico.add_uart(new UARTModule(4, 5, uart1, uart1Func));
+	
 
 	myPico.start();
 	return 0;
