@@ -266,8 +266,8 @@ public:
     float beta;             // Ownship Beta (Degrees)
     float gamma;            // Ownship Gamma (Radians)
     float pitch;            // Ownship Pitch (Radians)
-    float roll;             // Ownship Pitch (Radians)
-    float yaw;              // Ownship Pitch (Radians)
+    float roll;             // Ownship Roll (Radians)
+    float yaw;              // Ownship Yaw (Radians)
     float mach;             // Ownship Mach number
     float kias;             // Ownship Indicated Airspeed (Knots)
     float vt;               // Ownship True Airspeed (Ft/Sec)
@@ -354,11 +354,11 @@ public:
     int           RwrObjectCount;
     int           RWRsymbol[MAX_RWR_OBJECTS];
     float         bearing[MAX_RWR_OBJECTS];
-    long missileActivity[MAX_RWR_OBJECTS];
-    long missileLaunch[MAX_RWR_OBJECTS];
-    long selected[MAX_RWR_OBJECTS];
+    unsigned long missileActivity[MAX_RWR_OBJECTS];
+    unsigned long missileLaunch[MAX_RWR_OBJECTS];
+    unsigned long selected[MAX_RWR_OBJECTS];
     float         lethality[MAX_RWR_OBJECTS];
-    long newDetection[MAX_RWR_OBJECTS];
+    unsigned long newDetection[MAX_RWR_OBJECTS];
 
     //fuel values
     float fwd, aft, total;
@@ -412,7 +412,7 @@ public:
 };
 
 
-#define FLIGHTDATA2_VERSION 20
+#define FLIGHTDATA2_VERSION 22
 // Changelog:
 // 1: initial BMS 4.33 version
 // 2: added AltCalReading, altBits, uhf_panel_preset, powerBits, blinkBits, cmdsMode
@@ -434,6 +434,9 @@ public:
 // 18: added floodconsole brightness
 // 19: added ECM_M1-5, ECM oper + blinkbit, magnetic deviation, RWR jamming status
 // 20: added radio2_present and radio2_frequency, effective IFF transponder codes
+// 21: added TACAN ILS.
+// 22: added desired/configures RTT export FPS
+
 
 // do NOT change these w/o crosschecking the BMS code; also be aware that a change here is a BREAKING CHANGE in shared mem
 #define RWRINFO_SIZE 512
@@ -587,213 +590,222 @@ public:
         Betty_Lowspeed       = 0x04000,
         Betty_Beeps          = 0x08000,
         Betty_AOA            = 0x10000,
-	        Betty_MaxG           = 0x20000,
-	    };
+        Betty_MaxG           = 0x20000,
+    };
 
-	    // various flags - chances are that by now, we'll add new flags rarely and sparsely, so having a single "bulk pool" seems reasonable, size-wise
-	    enum MiscBits : unsigned int
-	    {
-	        RALT_Valid          = 0x01, // indicates weather the RALT reading is valid/reliable
-	        
-	        // VERSION 17
-	        Flcs_Flcc_A         = 0x02,
-	        Flcs_Flcc_B         = 0x04,
-	        Flcs_Flcc_C         = 0x08,
-	        Flcs_Flcc_D         = 0x10,
-	        AllLampBitsFlccOn   = 0x1e, // Not bit by itself! This is the check mask for ALL the Flcs bits.
+    // various flags - chances are that by now, we'll add new flags rarely and sparsely, so having a single "bulk pool" seems reasonable, size-wise
+    enum MiscBits : unsigned int
+    {
+        RALT_Valid          = 0x01, // indicates weather the RALT reading is valid/reliable
+        
+        // VERSION 17
+        Flcs_Flcc_A         = 0x02,
+        Flcs_Flcc_B         = 0x04,
+        Flcs_Flcc_C         = 0x08,
+        Flcs_Flcc_D         = 0x10,
+        AllLampBitsFlccOn   = 0x1e, // Not bit by itself! This is the check mask for ALL the Flcs bits.
 
-	        SolenoidStatus      = 0x20, // 0 not powered or failed or WOW, 1 is working OK
-	    };
+        SolenoidStatus      = 0x20, // 0 not powered or failed or WOW, 1 is working OK
+    };
 
-	    // VERSION 19
-	    enum EcmBits : unsigned int     // Note: these are currently not combinable bits, but mutually exclusive states!
-	    {
-	        ECM_UNPRESSED_NO_LIT  = 0x01,
-	        ECM_UNPRESSED_ALL_LIT = 0x02,
-	        ECM_PRESSED_NO_LIT    = 0x04,
-	        ECM_PRESSED_STANDBY   = 0x08,
-	        ECM_PRESSED_ACTIVE    = 0x10,
-	        ECM_PRESSED_TRANSMIT  = 0x20,
-	        ECM_PRESSED_FAIL      = 0x40,
-	        ECM_PRESSED_ALL_LIT   = 0x80,
-	    };
+    // VERSION 19
+    enum EcmBits : unsigned int     // Note: these are currently not combinable bits, but mutually exclusive states!
+    {
+        ECM_UNPRESSED_NO_LIT  = 0x01,
+        ECM_UNPRESSED_ALL_LIT = 0x02,
+        ECM_PRESSED_NO_LIT    = 0x04,
+        ECM_PRESSED_STANDBY   = 0x08,
+        ECM_PRESSED_ACTIVE    = 0x10,
+        ECM_PRESSED_TRANSMIT  = 0x20,
+        ECM_PRESSED_FAIL      = 0x40,
+        ECM_PRESSED_ALL_LIT   = 0x80,
+    };
 
-	    enum EcmOperStates : unsigned char
-	    {
-	        ECM_OPER_NO_LIT  = 0,
-	        ECM_OPER_STDBY   = 1,
-	        ECM_OPER_ACTIVE  = 2,
-	        ECM_OPER_ALL_LIT = 3,
-	    };
+    enum EcmOperStates : unsigned char
+    {
+        ECM_OPER_NO_LIT  = 0,
+        ECM_OPER_STDBY   = 1,
+        ECM_OPER_ACTIVE  = 2,
+        ECM_OPER_ALL_LIT = 3,
+    };
 
-	    enum JammingStates : unsigned char
-	    {
-	        JAMMED_NO     = 0,
-	        JAMMED_YES    = 1,
-	        JAMMED_SHOULD = 2,
-	    };
+    enum JammingStates : unsigned char
+    {
+        JAMMED_NO     = 0,
+        JAMMED_YES    = 1,
+        JAMMED_SHOULD = 2,
+    };
 
-	    // VERSION 1
-	    float nozzlePos2;       // Ownship engine nozzle2 percent open (0-100)
-	    float rpm2;             // Ownship engine rpm2 (Percent 0-103)
-	    float ftit2;            // Ownship Forward Turbine Inlet Temp2 (Degrees C)
-	    float oilPressure2;     // Ownship Oil Pressure2 (Percent 0-100)
-	    NavModes navMode;       // (unsigned char) current mode selected for HSI/eHSI, see NavModes enum for details
-	    float AAUZ;             // Ownship barometric altitude given by AAU (depends on calibration)
-	    char tacanInfo[NUMBER_OF_SOURCES]; // Tacan band/mode settings for UFC and AUX COMM
+    // VERSION 1
+    float nozzlePos2;       // Ownship engine nozzle2 percent open (0-100)
+    float rpm2;             // Ownship engine rpm2 (Percent 0-103)
+    float ftit2;            // Ownship Forward Turbine Inlet Temp2 (Degrees C)
+    float oilPressure2;     // Ownship Oil Pressure2 (Percent 0-100)
+    NavModes navMode;       // (unsigned char) current mode selected for HSI/eHSI, see NavModes enum for details
+    float AAUZ;             // Ownship barometric altitude given by AAU (depends on calibration)
+    char tacanInfo[NUMBER_OF_SOURCES]; // Tacan band/mode settings for UFC and AUX COMM
 
-	    // VERSION 2 / 7
-	    int AltCalReading;      // barometric altitude calibration (depends on CalType)
-	    unsigned int altBits;   // various altimeter bits, see AltBits enum for details
-	    unsigned int powerBits; // Ownship power bus / generator states, see PowerBits enum for details
-	    unsigned int blinkBits; // Cockpit indicator lights blink status, see BlinkBits enum for details
-	                            // NOTE: these bits indicate only *if* a lamp is blinking, in addition to the
-	                            // existing on/off bits. It's up to the external program to implement the
-	                            // *actual* blinking.
-	    CmdsModes cmdsMode;     // (int) Ownship CMDS mode state, see CmdsModes enum for details
-	    int uhf_panel_preset;       // BUP UHF channel preset (F16), radio 1 preset (other aircraft).
+    // VERSION 2 / 7
+    int AltCalReading;      // barometric altitude calibration (depends on CalType)
+    unsigned int altBits;   // various altimeter bits, see AltBits enum for details
+    unsigned int powerBits; // Ownship power bus / generator states, see PowerBits enum for details
+    unsigned int blinkBits; // Cockpit indicator lights blink status, see BlinkBits enum for details
+                            // NOTE: these bits indicate only *if* a lamp is blinking, in addition to the
+                            // existing on/off bits. It's up to the external program to implement the
+                            // *actual* blinking.
+    CmdsModes cmdsMode;     // (int) Ownship CMDS mode state, see CmdsModes enum for details
+    int uhf_panel_preset;       // BUP UHF channel preset (F16), radio 1 preset (other aircraft).
 
-	    // VERSION 3
-	    int uhf_panel_frequency;     // BUP UHF channel frequency, radio 1 frequency (other aircraft).
-	    float cabinAlt;     // Ownship cabin altitude
-	    float hydPressureA; // Ownship Hydraulic Pressure A
-	    float hydPressureB; // Ownship Hydraulic Pressure B
-	    int currentTime;    // Current time in seconds (max 60 * 60 * 24)
-	    short vehicleACD;   // Ownship ACD index number, i.e. which aircraft type are we flying.
-	    int VersionNum;     // Version of FlightData2 mem area
+    // VERSION 3
+    int uhf_panel_frequency;     // BUP UHF channel frequency, radio 1 frequency (other aircraft).
+    float cabinAlt;     // Ownship cabin altitude
+    float hydPressureA; // Ownship Hydraulic Pressure A
+    float hydPressureB; // Ownship Hydraulic Pressure B
+    int currentTime;    // Current time in seconds (max 60 * 60 * 24)
+    short vehicleACD;   // Ownship ACD index number, i.e. which aircraft type are we flying.
+    int VersionNum;     // Version of FlightData2 mem area
 
-	    // VERSION 4
-	    float fuelFlow2;    // Ownship fuel flow2 (Lbs/Hour)
+    // VERSION 4
+    float fuelFlow2;    // Ownship fuel flow2 (Lbs/Hour)
 
-	    // VERSION 5 / 8
-	    char RwrInfo[RWRINFO_SIZE]; // New RWR Info
-	    float lefPos;               // Ownship LEF position
-	    float tefPos;               // Ownship TEF position
+    // VERSION 5 / 8
+    char RwrInfo[RWRINFO_SIZE]; // New RWR Info
+    float lefPos;               // Ownship LEF position
+    float tefPos;               // Ownship TEF position
 
-	    // VERSION 6
-	    float vtolPos;      // Ownship VTOL exhaust angle
+    // VERSION 6
+    float vtolPos;      // Ownship VTOL exhaust angle
 
-	    // VERSION 9
-	    char pilotsOnline;                                // Number of pilots in an MP session
-	    char pilotsCallsign[MAX_CALLSIGNS][CALLSIGN_LEN]; // List of pilots callsign connected to an MP session
-	    char pilotsStatus[MAX_CALLSIGNS];                 // Status of the MP pilots, see enum FlyStates
+    // VERSION 9
+    char pilotsOnline;                                // Number of pilots in an MP session
+    char pilotsCallsign[MAX_CALLSIGNS][CALLSIGN_LEN]; // List of pilots callsign connected to an MP session
+    char pilotsStatus[MAX_CALLSIGNS];                 // Status of the MP pilots, see enum FlyStates
 
-	    // VERSION 10
-	    float bumpIntensity; // Intensity of a "bump" while taxiing/rolling, 0..1
+    // VERSION 10
+    float bumpIntensity; // Intensity of a "bump" while taxiing/rolling, 0..1
 
-	    // VERSION 11
-	    float latitude;      // Ownship latitude in degrees (as known by avionics)
-	    float longitude;     // Ownship longitude in degrees (as known by avionics)
+    // VERSION 11
+    float latitude;      // Ownship latitude in degrees (as known by avionics)
+    float longitude;     // Ownship longitude in degrees (as known by avionics)
 
-	    // VERSION 12
-	    unsigned short RTT_size[2];                 // RTT overall width and height
-	    unsigned short RTT_area[RTT_noOfAreas][4];  // For each area: left/top/right/bottom
+    // VERSION 12
+    unsigned short RTT_size[2];                 // RTT overall width and height
+    unsigned short RTT_area[RTT_noOfAreas][4];  // For each area: left/top/right/bottom
 
-	    // VERSION 13
-	    char iffBackupMode1Digit1;   // IFF panel backup Mode1 digit 1
-	    char iffBackupMode1Digit2;   // IFF panel backup Mode1 digit 2
-	    char iffBackupMode3ADigit1;  // IFF panel backup Mode3A digit 1
-	    char iffBackupMode3ADigit2;  // IFF panel backup Mode3A digit 2
+    // VERSION 13
+    char iffBackupMode1Digit1;   // IFF panel backup Mode1 digit 1
+    char iffBackupMode1Digit2;   // IFF panel backup Mode1 digit 2
+    char iffBackupMode3ADigit1;  // IFF panel backup Mode3A digit 1
+    char iffBackupMode3ADigit2;  // IFF panel backup Mode3A digit 2
 
-	    // VERSION 14
-	    InstrLight instrLight;       // (unsigned char) current instrument backlight brightness setting, see InstrLight enum for details
+    // VERSION 14
+    InstrLight instrLight;       // (unsigned char) current instrument backlight brightness setting, see InstrLight enum for details
 
-	    // VERSION 15
-	    unsigned int bettyBits;      // see BettyBits enum for details
-	    unsigned int miscBits;       // see MiscBits enum for details
-	    float RALT;                  // radar altitude (only valid/ reliable if MiscBit "RALT_Valid" is set)
-	    float bingoFuel;             // bingo fuel level
-	    float caraAlow;              // cara alow setting
-	    float bullseyeX;             // bullseye X in sim coordinates (same as ownship, i.e. North (Ft))
-	    float bullseyeY;             // bullseye Y in sim coordinates (same as ownship, i.e. East (Ft))
-	    int BMSVersionMajor;         // E.g.  4.
-	    int BMSVersionMinor;         //         34.
-	    int BMSVersionMicro;         //            1
-	    int BMSBuildNumber;          //              build 20050
-	    unsigned int StringAreaSize; // the overall size of the StringData/FalconSharedMemoryAreaString area
-	    unsigned int StringAreaTime; // last time the StringData/FalconSharedMemoryAreaString area has been changed - you only need to re-read the string shared mem if this changes
-	    unsigned int DrawingAreaSize;// the overall size of the DrawingData/FalconSharedMemoryAreaDrawing area
-	    
-	    // VERSION 16
-	    float turnRate;              // actual turn rate (no delay or dampening) in degrees/second
+    // VERSION 15
+    unsigned int bettyBits;      // see BettyBits enum for details
+    unsigned int miscBits;       // see MiscBits enum for details
+    float RALT;                  // radar altitude (only valid/ reliable if MiscBit "RALT_Valid" is set)
+    float bingoFuel;             // bingo fuel level
+    float caraAlow;              // cara alow setting
+    float bullseyeX;             // bullseye X in sim coordinates (same as ownship, i.e. North (Ft))
+    float bullseyeY;             // bullseye Y in sim coordinates (same as ownship, i.e. East (Ft))
+    int BMSVersionMajor;         // E.g.  4.
+    int BMSVersionMinor;         //         34.
+    int BMSVersionMicro;         //            1
+    int BMSBuildNumber;          //              build 20050
+    unsigned int StringAreaSize; // the overall size of the StringData/FalconSharedMemoryAreaString area
+    unsigned int StringAreaTime; // last time the StringData/FalconSharedMemoryAreaString area has been changed - you only need to re-read the string shared mem if this changes
+    unsigned int DrawingAreaSize;// the overall size of the DrawingData/FalconSharedMemoryAreaDrawing area
+    
+    // VERSION 16
+    float turnRate;              // actual turn rate (no delay or dampening) in degrees/second
 
-	    // VERSION 18
-	    FloodConsole floodConsole;   // (unsigned char) current floodconsole brightness setting, see FloodConsole enum for details
+    // VERSION 18
+    FloodConsole floodConsole;   // (unsigned char) current floodconsole brightness setting, see FloodConsole enum for details
 
-	    // VERSION 19
-	    float magDeviationSystem;    // current mag deviation of the system
-	    float magDeviationReal;      // current mag deviation of the system
+    // VERSION 19
+    float magDeviationSystem;    // current mag deviation of the system
+    float magDeviationReal;      // current mag deviation of the system
 
-	    unsigned int ecmBits[MAX_ECM_PROGRAMS]; // see EcmBits enum for details - Note: these are currently not combinable bits, but mutually exclusive states!
-	    EcmOperStates ecmOper;                  // (unsigned char) see enum EcmOperStates for details
+    unsigned int ecmBits[MAX_ECM_PROGRAMS]; // see EcmBits enum for details - Note: these are currently not combinable bits, but mutually exclusive states!
+    EcmOperStates ecmOper;                  // (unsigned char) see enum EcmOperStates for details
 
-	    JammingStates RWRjammingStatus[MAX_RWR_OBJECTS]; // (unsigned) char see enum JammingStates for details
+    JammingStates RWRjammingStatus[MAX_RWR_OBJECTS]; // (unsigned) char see enum JammingStates for details
 
-	    // VERSION 20
-	    int radio2_preset;       // Radio 2 channel preset (if present).
-	    int radio2_frequency;    // Radio 2 channel frequency (if present).
+    // VERSION 20
+    int radio2_preset;       // Radio 2 channel preset (if present).
+    int radio2_frequency;    // Radio 2 channel frequency (if present).
 
-	    // IFF transponder currently active (as seen from outside) codes, negative for OFF or n/a
-	    char  iffTransponderActiveCode1;  // mode 1
-	    short iffTransponderActiveCode2;  // mode 2
-	    short iffTransponderActiveCode3A; // mode 3A
-	    short iffTransponderActiveCodeC;  // mode C
-	    short iffTransponderActiveCode4;  // mode 4; assumes the correct codeword
+    // IFF transponder currently active (as seen from outside) codes, negative for OFF or n/a
+    char  iffTransponderActiveCode1;  // mode 1
+    short iffTransponderActiveCode2;  // mode 2
+    short iffTransponderActiveCode3A; // mode 3A
+    short iffTransponderActiveCodeC;  // mode C
+    short iffTransponderActiveCode4;  // mode 4; assumes the correct codeword
 
-	    // TACAN
-	    // setters for internal use only
-	    void SetUfcTacanToAA(bool t) { if (t) { tacanInfo[UFC] |= mode; } else { tacanInfo[UFC] &= ~mode; } }
-	    void SetAuxTacanToAA(bool t) { if (t) { tacanInfo[AUX] |= mode; } else { tacanInfo[AUX] &= ~mode; } }
-	    void SetUfcTacanToX(bool t)  { if (t) { tacanInfo[UFC] |= band; } else { tacanInfo[UFC] &= ~band; } }
-	    void SetAuxTacanToX(bool t)  { if (t) { tacanInfo[AUX] |= band; } else { tacanInfo[AUX] &= ~band; } }
+	// VERSION 21
+    int tacan_ils_frequency; // Tacan ILS (110.30 = 11030). Valid interval [108.10, 111.95].
 
-	    // getters for external reader programs
-	    bool UfcTacanIsAA(void) const { return ((tacanInfo[UFC] & mode) ? true : false); }
-	    bool AuxTacanIsAA(void) const { return ((tacanInfo[AUX] & mode) ? true : false); }
-	    bool UfcTacanIsX(void)  const { return ((tacanInfo[UFC] & band) ? true : false); }
-	    bool AuxTacanIsX(void)  const { return ((tacanInfo[AUX] & band) ? true : false); }
+	// VERSION 22
+	int desired_RTT_FPS;     // The configured RTT export FPS value, g_nRTTExport_FPS
 
-	    //setters/Clear are for BMS-internal use only; external reader programs can only use getters/IsSet
-	    
-	    // ALTIMETER
-	    void SetAltBit(AltBits newBit) { altBits |= newBit; };
-	    void ClearAltBit(AltBits newBit) { altBits &= ~newBit; };
-	    bool IsSetAlt(AltBits newBit) const { return ((altBits & newBit) ? true : false); };
+    // SIDE SLIP ANGLE 
+    float sideSlipdeg; // ADI side Slip 
 
-	    // POWER
-	    void SetPowerBit(PowerBits newBit) { powerBits |= newBit; };
-	    void ClearPowerBit(PowerBits newBit) { powerBits &= ~newBit; };
-	    bool IsSetPower(PowerBits newBit) const { return ((powerBits & newBit) ? true : false); };
+    // TACAN
+    // setters for internal use only
+    void SetUfcTacanToAA(bool t) { if (t) { tacanInfo[UFC] |= mode; } else { tacanInfo[UFC] &= ~mode; } }
+    void SetAuxTacanToAA(bool t) { if (t) { tacanInfo[AUX] |= mode; } else { tacanInfo[AUX] &= ~mode; } }
+    void SetUfcTacanToX(bool t)  { if (t) { tacanInfo[UFC] |= band; } else { tacanInfo[UFC] &= ~band; } }
+    void SetAuxTacanToX(bool t)  { if (t) { tacanInfo[AUX] |= band; } else { tacanInfo[AUX] &= ~band; } }
 
-	    // BLINKING LIGHTS
-	    void SetBlinkBit(BlinkBits newBit) { blinkBits |= newBit; };
-	    void ClearBlinkBit(BlinkBits newBit) { blinkBits &= ~newBit; };
-	    bool IsSetBlink(BlinkBits newBit) const { return ((blinkBits & newBit) ? true : false); };
+    // getters for external reader programs
+    bool UfcTacanIsAA(void) const { return ((tacanInfo[UFC] & mode) ? true : false); }
+    bool AuxTacanIsAA(void) const { return ((tacanInfo[AUX] & mode) ? true : false); }
+    bool UfcTacanIsX(void)  const { return ((tacanInfo[UFC] & band) ? true : false); }
+    bool AuxTacanIsX(void)  const { return ((tacanInfo[AUX] & band) ? true : false); }
 
-	    // CMDS mode state
-	    void SetCmdsMode(CmdsModes newMode) { cmdsMode = newMode; };
-	    CmdsModes GetCmdsMode(void) const { return cmdsMode; };
+    //setters/Clear are for BMS-internal use only; external reader programs can only use getters/IsSet
+    
+    // ALTIMETER
+    void SetAltBit(AltBits newBit) { altBits |= newBit; };
+    void ClearAltBit(AltBits newBit) { altBits &= ~newBit; };
+    bool IsSetAlt(AltBits newBit) const { return ((altBits & newBit) ? true : false); };
 
-	    // HSI/eHSI mode state
-	    void SetNavMode(NavModes newMode) { navMode = newMode; };
-	    NavModes GetNavMode(void) const { return navMode; };
+    // POWER
+    void SetPowerBit(PowerBits newBit) { powerBits |= newBit; };
+    void ClearPowerBit(PowerBits newBit) { powerBits &= ~newBit; };
+    bool IsSetPower(PowerBits newBit) const { return ((powerBits & newBit) ? true : false); };
 
-	    // BETTY BITS
-	    void SetBettyBit(BettyBits newBit) { bettyBits |= newBit; };
-	    void ClearBettyBit(BettyBits newBit) { bettyBits &= ~newBit; };
-	    bool IsSetBetty(BettyBits newBit) const { return ((bettyBits & newBit) ? true : false); };
+    // BLINKING LIGHTS
+    void SetBlinkBit(BlinkBits newBit) { blinkBits |= newBit; };
+    void ClearBlinkBit(BlinkBits newBit) { blinkBits &= ~newBit; };
+    bool IsSetBlink(BlinkBits newBit) const { return ((blinkBits & newBit) ? true : false); };
 
-	    // MISC BITS
-	    void SetMiscBit(MiscBits newBit) { miscBits |= newBit; };
-	    void ClearMiscBit(MiscBits newBit) { miscBits &= ~newBit; };
-	    bool IsSetMisc(MiscBits newBit) const { return ((miscBits & newBit) ? true : false); };
+    // CMDS mode state
+    void SetCmdsMode(CmdsModes newMode) { cmdsMode = newMode; };
+    CmdsModes GetCmdsMode(void) const { return cmdsMode; };
 
-	    // ECM BITS
-	    // Since the EcmBits are currently mutually exclusive states, there is no need for setters and getters to combine/filter "bits"
+    // HSI/eHSI mode state
+    void SetNavMode(NavModes newMode) { navMode = newMode; };
+    NavModes GetNavMode(void) const { return navMode; };
+
+    // BETTY BITS
+    void SetBettyBit(BettyBits newBit) { bettyBits |= newBit; };
+    void ClearBettyBit(BettyBits newBit) { bettyBits &= ~newBit; };
+    bool IsSetBetty(BettyBits newBit) const { return ((bettyBits & newBit) ? true : false); };
+
+    // MISC BITS
+    void SetMiscBit(MiscBits newBit) { miscBits |= newBit; };
+    void ClearMiscBit(MiscBits newBit) { miscBits &= ~newBit; };
+    bool IsSetMisc(MiscBits newBit) const { return ((miscBits & newBit) ? true : false); };
+
+    // ECM BITS
+    // Since the EcmBits are currently mutually exclusive states, there is no need for setters and getters to combine/filter "bits"
 };
 
 
-#define STRINGDATA_VERSION 4
+#define STRINGDATA_VERSION 5
 #define STRINGDATA_AREA_SIZE_MAX (1024 * 1024)
 // - NOTE: Check StringAreaSize in FalconSharedMemoryArea2 for the actual size of this area!
 // - NOTE: Treat this shared memory area as a pure "char*", not as "StringData*", since the size is not fixed!
@@ -805,6 +817,7 @@ public:
 // 2: added 3dbuttons.dat/3dckpit.dat file paths
 // 3: added NavPoints
 // 4: added ThrTerrdatadir
+// 5: added VoiceHelpers
 
 // *** "FalconSharedMemoryAreaString" ***
 class StringData
@@ -872,6 +885,37 @@ public:
 
         // VERSION 4
         ThrTerrdatadir,
+
+        // VERSION 5
+        VoiceHelpers,            // A comma separated list of tokens that represent flight and agency names used in AI radio comms
+                                 // The format of the string is a single line laid out as follows:
+                                 // 
+                                 //     <player>|<seats>,<tanker>,<awacs>,<departure>,<arrival>,<alternate>
+                                 // 
+                                 // where:
+                                 // 
+                                 //     <player> represents the local player's ownship flight name, "Goblin1" for example
+                                 // 
+                                 //     '|' is a literal pipe symbol character as a separator between the <player> and <seats> tokens
+                                 // 
+                                 //     <seats> is a 4-character token representing the occupancy of the 4 slots in a flight wherein:
+                                 //         'P' is for the local session player
+                                 //         'H' is for any other human player
+                                 //         'A' is for an AI piloted jet
+                                 //         'X' is for a slot in the flight that has no jet
+                                 // 
+                                 //     for example as <seats> token of "HPXX" would represent a multi-player mission 2-ship with the local 
+                                 //     player flying in the #2 slot.
+                                 // 
+                                 //     <tanker> is the callsign of any assigned tanker flight or "None" if there isn't one assigned in the
+                                 //     ATO. For example "Texaco7".
+                                 // 
+                                 //     <awacs> is the callsign of any assign Air Battle Manager or Weapons Director agency (normally AWACS)
+                                 //     assigned to the flight or "None" if there is no such support flight.  Example might be "Chalice9".
+                                 // 
+                                 //     <departure>, <arrival> and <alternate> are respectively the names of the landing sites for the flights
+                                 //     takeoff, planned landing and alternate landing sites.  For example you might see "Osan,Osan,Pyeongtaek"
+                                 //     for a flight that plans a round trip to/from Osan with the other named airbase as the alternate.
 
         // FIXED LAST ENTRY
         StringIdentifier_DIM     // (number of identifiers; add new IDs only *above* this one)
