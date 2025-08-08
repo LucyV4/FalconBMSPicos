@@ -10,7 +10,7 @@
 class PotInput : public InputModule {
 public:
 
-	explicit PotInput(const uint8_t gpio_pin, const uint8_t adc_num, std::function<void(const PicoData&, uint16_t)> update_function) : InputModule(gpio_pin), adcNum(adc_num), updateFunc(update_function) {}
+	explicit PotInput(const uint8_t gpio_pin, const uint8_t adc_num, std::function<void(PicoData&, uint16_t)> update_function) : InputModule(gpio_pin), adcNum(adc_num), updateFunc(update_function) {}
 	explicit PotInput(const uint8_t gpio_pin, const uint8_t adc_num, uint8_t controller_throttle_index) : InputModule(gpio_pin), adcNum(adc_num) {
 		updateFunc = [controller_throttle_index](PicoData& data, uint16_t raw_value) { data.setThrottle(controller_throttle_index, raw_value); };
 	}

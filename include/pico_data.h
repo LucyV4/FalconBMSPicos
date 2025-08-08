@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "flightdata.h"
+#include "dict.h"
 
 class PicoData {
 public:
@@ -21,4 +22,5 @@ public:
 	HIDReport report;
 	FlightData flightData = FlightData();
 	FlightData2 flightData2 = FlightData2();
+	Dict dict = Dict();
 };

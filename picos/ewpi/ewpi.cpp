@@ -48,6 +48,9 @@ int main() {
 		display.writef(0, "%d", data.flightData.ChaffCount);
 		display.writef(4, "%*d", 4, data.flightData.FlareCount);
 		display.writef(8, "JMR.data.");
+
+		uint8_t display_brightness = data.dict.get("disp_brightness", 15);
+		display.setBrightness(display_brightness);
 	};
 	myPico.add_output(new DisplayOutput(DISDATAIN, DISRS, DISCLOCK, DISCE, DISRESET, DISBLANK, 16, ewpiDisplayFunc));
 
@@ -61,7 +64,13 @@ int main() {
 	// };
 	// myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
 	// myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
-	// myPico.add_input(new PotInput(BRTPOT, BRTADC, 0));
+	
+	std::function<void(PicoData&, uint16_t)> potFunc;
+	potFunc = [](PicoData& data, uint16_t raw_val) {
+		uint8_t brightness = (raw_val) >> 8;
+		data.dict.set("disp_brightness", brightness);
+	};
+	myPico.add_input(new PotInput(BRTPOT, BRTADC, potFunc));
 
 	/*
 	 ** EXAMPLE UART MODULES
@@ -80,7 +89,6 @@ int main() {
 		gpio_put(25, rec > 0);
 	};
 	myPico.add_uart(new UARTModule(4, 5, uart1, uart1Func));
-	
 
 	myPico.start();
 	return 0;

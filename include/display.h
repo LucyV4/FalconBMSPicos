@@ -7,6 +7,7 @@
 #include <stdarg.h>
 
 #include "hardware/gpio.h"
+#include "hardware/pwm.h"
 #include "pico/time.h"
 
 #include "font5x7.h"
@@ -47,8 +48,21 @@ class Display {
 			gpio_set_dir(chipEnable, GPIO_OUT);
 			gpio_init(resetPin);
 			gpio_set_dir(resetPin, GPIO_OUT);
-			gpio_init(blankPin);
-			gpio_set_dir(blankPin, GPIO_OUT);
+
+			// Sets PWM for brightness control on leds
+			gpio_set_function(blankPin, GPIO_FUNC_PWM);
+			this->sliceNum = pwm_gpio_to_slice_num(blankPin);
+			this->channel = pwm_gpio_to_channel(blankPin);
+
+			pwm_set_wrap(sliceNum, 255);
+			if (channel == PWM_CHAN_A) {
+				pwm_set_output_polarity(sliceNum, true, false);
+			} else {
+			    pwm_set_output_polarity(sliceNum, false, true);
+			}
+
+			pwm_set_chan_level(sliceNum, channel, 255);
+			pwm_set_enabled(sliceNum, true);
 
 			gpio_put(resetPin, 0);
 			sleep_ms(10);
@@ -96,11 +110,8 @@ class Display {
 		}
 
 		void setBrightness(uint8_t brightness) {
-			if (brightness > 15) {
-				brightness = 15;
-			}
-
-			loadAllControlRegisters(0b01110000 + brightness);
+			uint8_t pwm_brightness = (uint16_t(brightness) * 255) / 15;
+			pwm_set_chan_level(sliceNum, channel, pwm_brightness);
 		}
 	
 	private:
@@ -182,4 +193,6 @@ class Display {
 		uint8_t resetPin;			// the display's reset pin
 		uint8_t blankPin;			// the display's blank pin
 		uint8_t displayLength;		// number of bytes needed to pad the string
+		uint8_t sliceNum;
+		uint8_t channel;
 };
