@@ -44,7 +44,6 @@ public:
 
 		// Some logic
 		updateFunc(data, is_pressed);
-		data.setButton(0, is_pressed);
 
 		return;
 	}
