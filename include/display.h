@@ -129,12 +129,13 @@ class Display {
 
   		// Character display setters:
 		void writeCharacter(char character, uint8_t position) {
-			uint16_t thisPosition =  position * 5;
-			uint16_t fontChar = ((int) character) - 0x20;
+			uint8_t startChar = Font5x7[0]; // ASCII start offset (0x01)
+			uint16_t thisPosition = position * 5;
+			uint16_t fontChar = ((int)character) - startChar;
 
 			for (int i = 0; i < 5; i++) {
-				uint8_t fontCharByte = fontChar*5 + i;
-				dotRegister[thisPosition+i] = Font5x7[fontCharByte];
+			    uint16_t fontCharByte = 5 + fontChar * 5 + i; // +5 skips metadata
+			    dotRegister[thisPosition + i] = Font5x7[fontCharByte];
 			}
 		}
 
