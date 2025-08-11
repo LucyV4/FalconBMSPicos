@@ -16,7 +16,7 @@ void PicoDevice::start() {
 
 	init_modules();
 	
-	const uint8_t ONBRDLED = 25;
+	const uint8_t ONBRDLED = PICO_DEFAULT_LED_PIN;
 	gpio_init(ONBRDLED);
 	gpio_set_dir(ONBRDLED, GPIO_OUT);
 	gpio_put(ONBRDLED, 1);
