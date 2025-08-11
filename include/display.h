@@ -84,7 +84,7 @@ class Display {
 			loadDotRegister();
 		}
 
-		void write(char character, uint8_t position) {
+		void write(uint8_t character, uint8_t position) {
 			this->writeCharacter(character, position);
 		}
 
@@ -99,7 +99,7 @@ class Display {
 
 			int8_t charPos = 0;
 			while (*out != '\0') {
-				this->writeCharacter(*out, fromPosition+charPos);
+				this->writeCharacter((uint8_t)*out, fromPosition+charPos);
 				out++;
 				charPos++;
 			}
@@ -128,10 +128,10 @@ class Display {
 		}
 
   		// Character display setters:
-		void writeCharacter(char character, uint8_t position) {
+		void writeCharacter(uint8_t character, uint8_t position) {
 			uint8_t startChar = Font5x7[0]; // ASCII start offset (0x01)
 			uint16_t thisPosition = position * 5;
-			uint16_t fontChar = ((int)character) - startChar;
+			uint16_t fontChar = character - startChar;
 
 			for (int i = 0; i < 5; i++) {
 			    uint16_t fontCharByte = 5 + fontChar * 5 + i; // +5 skips metadata

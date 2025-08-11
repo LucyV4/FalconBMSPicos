@@ -45,9 +45,14 @@ int main() {
 
 	std::function<void(PicoData&, Display&)> ewpiDisplayFunc;
 	ewpiDisplayFunc = [](PicoData& data, Display& display) {
-		display.writef(0, "%d", data.flightData.ChaffCount);
-		display.writef(4, "%*d", 4, data.flightData.FlareCount);
+		uint8_t chaffCount = data.flightData.ChaffCount;
+		uint8_t flareCount = data.flightData.FlareCount;
+
+		display.writef(0, "%d", chaffCount);
+		display.writef(4, "%*d", 4, flareCount);
 		display.writef(8, "JMR.data.");
+
+		display.write(CHAR_AUTO, 10);
 
 		uint8_t display_brightness = data.dict.get("disp_brightness", 15);
 		display.setBrightness(display_brightness);
@@ -57,13 +62,12 @@ int main() {
 	/*
 	 ** EXAMPLE INPUT MODULES
 	 */
-	// std::function<void(PicoData&, bool)> toggleButtonFunc;
-	// toggleButtonFunc = [](PicoData& data, bool button_on) {
-	// 	gpio_put(25, button_on);
-	// 	data.setButton(0, button_on);
-	// };
-	// myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
-	// myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
+	std::function<void(PicoData&, bool)> toggleButtonFunc;
+	toggleButtonFunc = [](PicoData& data, bool button_on) {
+		data.setButton(0, button_on);
+	};
+	myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
+	myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
 	
 	std::function<void(PicoData&, uint16_t)> potFunc;
 	potFunc = [](PicoData& data, uint16_t raw_val) {
@@ -83,12 +87,13 @@ int main() {
 	};
 	myPico.add_uart(new UARTModule(EWMUTX, EWMURX, uart0, uart0Func));
 	
-	std::function<void(PicoData&, uart_inst_t*)> uart1Func;
-	uart1Func = [](PicoData& data, uart_inst_t* uart_inst) {
-		uint8_t rec = uart_getc(uart_inst);
-		gpio_put(25, rec > 0);
-	};
-	myPico.add_uart(new UARTModule(4, 5, uart1, uart1Func));
+	// Test uart 0 to uart1
+	// std::function<void(PicoData&, uart_inst_t*)> uart1Func;
+	// uart1Func = [](PicoData& data, uart_inst_t* uart_inst) {
+	// 	uint8_t rec = uart_getc(uart_inst);
+	// 	gpio_put(25, rec > 0);
+	// };
+	// myPico.add_uart(new UARTModule(4, 5, uart1, uart1Func));
 
 	myPico.start();
 	return 0;

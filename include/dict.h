@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstring>
 
 #define MAX_ENTRIES 8
