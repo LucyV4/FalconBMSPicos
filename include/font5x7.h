@@ -171,9 +171,9 @@ static const unsigned char Font5x7[] = {
 	0x51, 0x4A, 0x44, 0x4A, 0x51, // 0x83
 };
 
-#endif
-
 #define CHAR_AUTO 0x80
 #define CHAR_SEMI 0x81
 #define CHAR_MAN 0x82
 #define CHAR_STBY 0x83
+
+#endif
