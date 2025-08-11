@@ -117,6 +117,6 @@ pico_add_extra_outputs(${PICO_NAME})
 Mind that it is **important to have the** `[PICO_NAME]` **in the** `PicoDevice` **constructor in upper case and to keep the** `[pico_name]` **the same throughout for** `make flash` **to work.** See the ewpi and ewmu as examples, all the files are just ewpi/ewmu except for the device name which is in upper case.
 
 ## Credits
-The `display.h` was adapted from [LedDisplay](https://github.com/PaulStoffregen/LedDisplay) by Paul Stoffregen. The font used in `display.h` was made by Pascal Stang.
+The `display.h` was adapted from [LedDisplay](https://github.com/PaulStoffregen/LedDisplay) by Paul Stoffregen. The font used in `display.h` is made by Andreas Taylor (see [https://github.com/Andy4495/HCMS39xx](https://github.com/Andy4495/HCMS39xx)). There was a previous version of the font made by Pascal Stang but it did not have the full range of characters I looked for.
 
 Next to this I also took `flightdata.h` from the Falcon BMS tools such that I am able to use the flightdata classes.
