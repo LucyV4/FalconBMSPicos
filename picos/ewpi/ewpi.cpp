@@ -48,41 +48,49 @@ int main() {
 		uint8_t chaffCount = data.flightData.ChaffCount;
 		uint8_t flareCount = data.flightData.FlareCount;
 
+
 		uint8_t CMDSMode = static_cast<uint8_t>(data.flightData2.cmdsMode);
 
-		if (CMDSMode == 0) {
-			//display.clear();
-		} else if (CMDSMode == 1) {
-			display.write(CHAR_STBY, 4);
-		} else if (CMDSMode == 2) {
-			display.write(CHAR_MAN, 4);
-		} else if (CMDSMode == 3) {
-			display.write(CHAR_SEMI, 4);
-		} else {
-			display.write(CHAR_AUTO, 4);
+		switch(CMDSMode) {
+			case 0:
+				//display.clear();
+				break;
+			case 1:
+				display.write(CHAR_STBY, 4);
+				break;
+			case 2:
+				display.write(CHAR_MAN, 4);
+				break;
+			case 3:
+				display.write(CHAR_SEMI, 4);
+				break;
+			case 4:
+				display.write(CHAR_AUTO, 4);
+				break;
 		}
 
-		//uint8_t EcmOperState = static_cast<uint8_t>(data.flightData2.ecmOper);
-		uint8_t ecmOn = data.flightData.IsSet2(FlightData::LightBits2::Degr);
 
-		if (ecmOn != 0) {
+		uint8_t ecmOn = data.flightData.IsSet2(FlightData::LightBits2::Degr);
+		uint8_t ECMMode = static_cast<uint8_t>(data.flightData2.ecmOper);
+
+		if (ecmOn == 0) {
 			display.writef(8, "OFF     ");
 		} else {
-			uint8_t ECMMode = static_cast<uint8_t>(data.flightData2.ecmOper);
-			if (ECMMode == 1) {
-				display.writef(8, " SBY AAA");
-			}
-			else if (ECMMode == 2) {
-				display.writef(8, " RDY AAA");
+			switch (ECMMode) {
+				case 1:
+					display.writef(8, " SBY SSS");
+					break;
+				case 2:
+					display.writef(8, " RDY SSS");
+					break;
 			}
 		}
+
 
 		display.writef(0, "A");
 		display.writef(1, "%d", chaffCount);
 		display.writef(5, "%*d", 3, flareCount);
-		//display.writef(8, "JMR.data.");
 
-		//display.write(CHAR_AUTO, 4);
 
 		uint8_t display_brightness = data.dict.get("disp_brightness", 15);
 		display.setBrightness(display_brightness);
