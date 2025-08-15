@@ -31,3 +31,4 @@ set(SHARED_LIBS
 # DEFINE PICOS HERE
 add_subdirectory("ewpi")
 add_subdirectory("ewmu")
+add_subdirectory("example")

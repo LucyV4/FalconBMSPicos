@@ -16,10 +16,10 @@ enum GpioPins: uint8_t {
 	PRILED = 8,		// PRI led
 	OPNLED = 9,		// OPN led
 
-	PRIBTN = 12,	// PRI button
-	SEPBTN = 13,	// SEP button
-	UNKBTN = 14,	// UNK button
-	MODEBTN = 15,	// MODE button
+	PRIBTN = 10,	// PRI button
+	SEPBTN = 11,	// SEP button
+	UNKBTN = 12,	// UNK button
+	MODEBTN = 13,	// MODE button
 
 	DISBLANK = 16,	// Display Blank (can go?)
 	DISCE = 17,		// Display chip enable
@@ -32,15 +32,7 @@ enum GpioPins: uint8_t {
 	BRTADC = 2,		// BRT pot adc num
 };
 
-enum CMDSModes: uint8_t {
-	CMDS_OFF = 0,
-	CMDS_STBY = 1,
-	CMDS_MAN = 2,
-	CMDS_SEMI = 3,
-	CMDS_AUTO = 4,
-};
-
-PicoDevice myPico("EWPI");
+PicoDevice myPico("EXAMPLE");
 
 int main() {
 	/*
@@ -56,49 +48,11 @@ int main() {
 		uint8_t chaffCount = data.flightData.ChaffCount;
 		uint8_t flareCount = data.flightData.FlareCount;
 
+		display.writef(0, "%d", chaffCount);
+		display.writef(4, "%*d", 4, flareCount);
+		display.writef(8, "JMR.data.");
 
-		uint8_t CMDSMode = static_cast<uint8_t>(data.flightData2.cmdsMode);
-
-		switch(CMDSMode) {
-			case CMDS_OFF:
-				//display.clear();
-				break;
-			case CMDS_STBY:
-				display.write(CHAR_STBY, 4);
-				break;
-			case CMDS_MAN:
-				display.write(CHAR_MAN, 4);
-				break;
-			case CMDS_SEMI:
-				display.write(CHAR_SEMI, 4);
-				break;
-			case CMDS_AUTO:
-				display.write(CHAR_AUTO, 4);
-				break;
-		}
-
-
-		uint8_t ecmOn = data.flightData.IsSet2(FlightData::LightBits2::Degr);
-		uint8_t ECMMode = static_cast<uint8_t>(data.flightData2.ecmOper);
-
-		if (ecmOn == 0) {
-			display.writef(8, "OFF     ");
-		} else {
-			switch (ECMMode) {
-				case 1:
-					display.writef(8, " SBY SSS");
-					break;
-				case 2:
-					display.writef(8, " RDY SSS");
-					break;
-			}
-		}
-
-
-		display.writef(0, "A");
-		display.writef(1, "%d", chaffCount);
-		display.writef(5, "%*d", 3, flareCount);
-
+		display.write(CHAR_AUTO, 10);
 
 		uint8_t display_brightness = data.dict.get("disp_brightness", 15);
 		display.setBrightness(display_brightness);
@@ -108,19 +62,12 @@ int main() {
 	/*
 	 ** EXAMPLE INPUT MODULES
 	 */
-	// std::function<void(PicoData&, bool)> toggleButtonFunc;
-	// toggleButtonFunc = [](PicoData& data, bool button_on) {
-	// 	data.setButton(0, button_on);
-	// };
-	// myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
-	// myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
-
-	for (int i = 0; i < 4; ++i) {
-		auto toggleButtonFunc = [i](PicoData& data, bool button_on) {
-			data.setButton(i, button_on);
-    	};
-    	myPico.add_input(new ButtonInput(PRIBTN + i, toggleButtonFunc, ButtonMode::ActiveLow)); // Adjust PRIBTN + i as needed
-	}
+	std::function<void(PicoData&, bool)> toggleButtonFunc;
+	toggleButtonFunc = [](PicoData& data, bool button_on) {
+		data.setButton(0, button_on);
+	};
+	myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
+	myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
 	
 	std::function<void(PicoData&, uint16_t)> potFunc;
 	potFunc = [](PicoData& data, uint16_t raw_val) {
@@ -132,13 +79,13 @@ int main() {
 	/*
 	 ** EXAMPLE UART MODULES
 	 */
-	// std::function<void(PicoData&, uart_inst_t*)> uart0Func;
-	// uart0Func = [](PicoData& data, uart_inst_t* uart_inst) {
-	// 	bool flag = data.flightData.IsSet2(FlightData::LightBits2::Unk);
-	// 	uint8_t byte_to_send = flag;
-	// 	uart_putc(uart_inst, byte_to_send);
-	// };
-	// myPico.add_uart(new UARTModule(EWMUTX, EWMURX, uart0, uart0Func));
+	std::function<void(PicoData&, uart_inst_t*)> uart0Func;
+	uart0Func = [](PicoData& data, uart_inst_t* uart_inst) {
+		bool flag = data.flightData.IsSet2(FlightData::LightBits2::Unk);
+		uint8_t byte_to_send = flag;
+		uart_putc(uart_inst, byte_to_send);
+	};
+	myPico.add_uart(new UARTModule(EWMUTX, EWMURX, uart0, uart0Func));
 	
 	// Test uart 0 to uart1
 	// std::function<void(PicoData&, uart_inst_t*)> uart1Func;
