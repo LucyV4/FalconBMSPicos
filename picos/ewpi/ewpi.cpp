@@ -105,15 +105,7 @@ int main() {
 	};
 	myPico.add_output(new DisplayOutput(DISDATAIN, DISRS, DISCLOCK, DISCE, DISRESET, DISBLANK, 16, ewpiDisplayFunc));
 
-	/*
-	 ** EXAMPLE INPUT MODULES
-	 */
-	// std::function<void(PicoData&, bool)> toggleButtonFunc;
-	// toggleButtonFunc = [](PicoData& data, bool button_on) {
-	// 	data.setButton(0, button_on);
-	// };
-	// myPico.add_input(new ButtonInput(PRIBTN, toggleButtonFunc, ButtonMode::Toggle));
-	// myPico.add_input(new ButtonInput(PRIBTN, 0, ButtonMode::Toggle));
+	// Inputs
 
 	for (int i = 0; i < 4; ++i) {
 		auto toggleButtonFunc = [i](PicoData& data, bool button_on) {
